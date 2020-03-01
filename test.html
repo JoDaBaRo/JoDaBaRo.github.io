@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset=utf-8 />
+<title>Single marker</title>
+<meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
+<script src='https://api.mapbox.com/mapbox.js/v3.2.1/mapbox.js'></script>
+<link href='https://api.mapbox.com/mapbox.js/v3.2.1/mapbox.css' rel='stylesheet' />
+<style>
+  body { margin:0; padding:0; }
+  #map { position:absolute; top:0; bottom:0; width:100%; }
+</style>
+</head>
+<body>
+<div id='map'></div>
+
+<script>
+var actual_JSON
+function loadJSON(callback) {   
+
+    var xobj = new XMLHttpRequest();
+        xobj.overrideMimeType("application/json");
+    xobj.open('GET', 'position.json', true); // Replace 'my_data' with the path to your file
+    xobj.onreadystatechange = function () {
+          if (xobj.readyState == 4 && xobj.status == "200") {
+            // Required use of an anonymous callback as .open will NOT return a value but simply returns undefined in asynchronous mode
+            callback(xobj.responseText);
+          }
+    };
+    xobj.send(null);  
+ }
+ loadJSON(function(response) {
+      // Parse JSON string into object
+     actual_JSON = JSON.parse(response);
+     });
+L.mapbox.accessToken = 'pk.eyJ1IjoicHJpbWFsNjU0IiwiYSI6ImNrNzlpbGpkdjBsOXgzZW15aHo0d3l6YWEifQ.g4OB9rZzsc_uP0BT2BpemA';
+var map = L.mapbox.map('map')
+    .setView([38.91338, -77.03236], 16)
+    .addLayer(L.mapbox.styleLayer('mapbox://styles/mapbox/streets-v11'));
+
+L.mapbox.featureLayer({
+    // this feature is in the GeoJSON format: see geojson.org
+    // for the full specification
+    type: 'Feature',
+    geometry: {
+        type: 'Point',
+        // coordinates here are in longitude, latitude order because
+        // x, y is the standard for GeoJSON and many formats
+        coordinates: [
+          actual_JSON.latitude,
+          actual_JSON.longitude
+        ]
+    },
+    properties: {
+        title: 'Peregrine Espresso',
+        description: '1718 14th St NW, Washington, DC',
+        // one can customize markers by adding simplestyle properties
+        // https://www.mapbox.com/guides/an-open-platform/#simplestyle
+        'marker-size': 'large',
+        'marker-color': '#BE9A6B',
+        'marker-symbol': 'cafe'
+    }
+}).addTo(map);
+</script>
+</body>
+</html>
